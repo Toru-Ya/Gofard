@@ -1,2 +1,2 @@
 # Gofard
-data science tools for all R and D 
+GUI data science tools for all R and D 
