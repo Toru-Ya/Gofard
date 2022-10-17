@@ -377,12 +377,7 @@ shinyUI(navbarPage(theme = shinytheme("sandstone"),"Gofard",
        )
      )),
      ),#class_navebar tab end--------
-     #check tab----------
-     tabPanel("check",
-              textOutput("zzzz"),
-      
-              
-              )#check tab end
+     
               
  
        #end-----------
