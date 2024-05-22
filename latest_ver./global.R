@@ -2,6 +2,10 @@ if(!require(shiny)){
   install.packages("shiny",dependencies = TRUE)
   library(shiny)
 }
+if(!require(ragg)){
+  install.packages("ragg",dependencies = TRUE)
+  library(ragg)
+}
 ##csv_up_down_moduele-----------
 #uif_csv_uplode
 uif_csv_uplode=function(id, label = "CSV file") {

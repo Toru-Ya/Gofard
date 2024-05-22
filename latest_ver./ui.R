@@ -10,9 +10,14 @@ if(!require(DT)){
   install.packages("DT",dependencies = TRUE)
   library(DT)
 }
+if(!require(ragg)){
+  install.packages("ragg",dependencies = TRUE)
+  library(ragg)
+}
+
+
 
 shinyUI(navbarPage(theme = shinytheme("sandstone"),"Gofard",
-                   
       ##Home tab-------
        tabPanel("Home",
        h1("Gofard - Data Science Toolkit for all R and D"),
@@ -114,21 +119,29 @@ shinyUI(navbarPage(theme = shinytheme("sandstone"),"Gofard",
           htmlOutput("colname3"),
           h5("4.Regression Line: Select whether to add a regression line to the graph"),
           htmlOutput("colname4"),
-          h5("5.Create graph"),
+          h5("5.You can choose unused rows."),
+          htmlOutput("colname5"),
+          h5("6.Create graph"),
           actionButton("trigger_data_plot", "Output plot"),
           ),
           mainPanel(
           tabsetPanel(type = "tabs",
-                      tabPanel("Check data", 
+                      tabPanel("Uploaded data", 
                                DT::dataTableOutput("table")),
+                      tabPanel("Usage data", 
+                               DT::dataTableOutput("Usage_table"),
+                               h6("Output table data as csv"),
+                               downloadButton("downloadData_scatter", "Download")
+                               ),
                       tabPanel("Output plot", 
                                h5("You can check the data of the dragged point."),
                                plotOutput("scatter_plot", brush = brushOpts(id="plot_brush")),
                                DT::dataTableOutput("plot_brushedPoints"),
                                ),
+                      
         ))
       )),
-      ##bar_box polt-------
+      ##bar_box plot-------
       tabPanel("Bar graph/Box plot", sidebarLayout(
         sidebarPanel(
           h3("Data setting"),
@@ -146,13 +159,20 @@ shinyUI(navbarPage(theme = shinytheme("sandstone"),"Gofard",
                                           "Standard deviation"="sd")),
           h5("4.Scatter Points: Add data scatter points to your bar chart"),
           selectInput("bar_scatter", "",c("OFF","ON")),
-          h5("5.Create graph"),
+          h5("5.You can choose unused rows."),
+          htmlOutput("unused_rows_barbox"),
+          h5("6.Create graph"),
           actionButton("trigger_barbox", "Output plot"),
         ),
         mainPanel(
           tabsetPanel(type = "tabs",
-                      tabPanel("Check data", 
+                      tabPanel("Upload data", 
                                DT::dataTableOutput("table_barbox")),
+                      tabPanel("Usage data", 
+                               DT::dataTableOutput("Usage_table_barbox"),
+                               h6("Output table data as csv"),
+                               downloadButton("download_usagedata_barbox", "Download")
+                               ),
                       tabPanel("Output plot", 
                                h5("Bar graph"),
                                plotOutput("bar_plot"),
@@ -171,13 +191,20 @@ shinyUI(navbarPage(theme = shinytheme("sandstone"),"Gofard",
           htmlOutput("data_histogram_x"),
           h5("3.Color-code: select categorical data columns"),
           htmlOutput("data_histogram_color"),
-          h5("4.Create graph"),
+          h5("4.You can choose unused rows."),
+          htmlOutput("unused_rows_histogram"),
+          h5("5.Create graph"),
           actionButton("trigger_histogram", "Output plot"),
         ),
         mainPanel(
           tabsetPanel(type = "tabs",
-                      tabPanel("Check data", 
+                      tabPanel("Upload data", 
                                DT::dataTableOutput("table_histogram")),
+                      tabPanel("Usage data", 
+                               DT::dataTableOutput("Usage_table_histogram"),
+                               h6("Output table data as csv"),
+                               downloadButton("download_usagedata_histogram", "Download")
+                      ),
                       tabPanel("Output plot", 
                                h5("histogram"),
                                plotOutput("histogram_plot"),
@@ -193,13 +220,20 @@ shinyUI(navbarPage(theme = shinytheme("sandstone"),"Gofard",
           h5("2.Select data columns to use"),
           htmlOutput("data_corrplot"),
           h6("※Select a column that contains only numerics."),
-          h5("3.Create graph"),
+          h5("3.You can choose unused rows."),
+          htmlOutput("unused_rows_corrplot"),
+          h5("4.Create graph"),
           actionButton("trigger_corrplot", "Output plot"),
         ),
         mainPanel(
           tabsetPanel(type = "tabs",
-                      tabPanel("Check data", 
+                      tabPanel("Upload data", 
                                DT::dataTableOutput("table_corrplot")),
+                      tabPanel("Usage data", 
+                               DT::dataTableOutput("Usage_table_corrplot"),
+                               h6("Output table data as csv"),
+                               downloadButton("download_usagedata_corrplot", "Download")
+                      ),
                       tabPanel("Output plot", 
                                h5("Scatter plot matrix"),
                                plotOutput("scatter_matrix"),
@@ -218,12 +252,19 @@ shinyUI(navbarPage(theme = shinytheme("sandstone"),"Gofard",
           uif_csv_uplode("datafile_ac", ""),
           htmlOutput("data_ac"),
           h6("※Select a column that contains only numerics."),
+          h5("3.You can choose unused rows."),
+          htmlOutput("unused_rows_ac"),
           actionButton("button_ac", "Calculation")
         ),
         mainPanel(
           tabsetPanel(type = "tabs",
-                      tabPanel("Check data", 
+                      tabPanel("Upload data", 
                                DT::dataTableOutput("table_ac")),
+                      tabPanel("Usage data", 
+                               DT::dataTableOutput("Usage_table_ac"),
+                               h6("Output table data as csv"),
+                               downloadButton("download_usagedata_ac", "Download")
+                      ),
                       tabPanel("Result", 
                                h4("Data list"),
                                #h6("左端にクラスタ番号が入っています。"),
@@ -283,7 +324,7 @@ shinyUI(navbarPage(theme = shinytheme("sandstone"),"Gofard",
       )),#PERT end--------
       ),  #design tab tab--------
      ##prediction tab-----
-     navbarMenu("Numerical prediction",
+     navbarMenu("Analysis/Prediction",
      #lslr-----
      tabPanel("Single regression analysis", sidebarLayout(
               sidebarPanel(
@@ -292,23 +333,30 @@ shinyUI(navbarPage(theme = shinytheme("sandstone"),"Gofard",
               uif_csv_uplode("datafile_reg_lslr", ""),
               htmlOutput("data_reg_x_lslr"),
               htmlOutput("data_reg_y_lslr"),
-              h5("4.Select a csv file of prediction data for y"),
+              h5("4.You can choose unused rows."),
+              htmlOutput("unused_rows_lslr"),
+              h5("5.Select a csv file of prediction data for y"),
               uif_csv_uplode("datafile_predY_lslr", ""),
               htmlOutput("data_predY_x_lslr"),
-              h5("4.Select a csv file of prediction data for x"),
+              h5("6.Select a csv file of prediction data for x"),
               uif_csv_uplode("datafile_predX_lslr", ""),
               htmlOutput("data_predX_y_lslr"),
               actionButton("regression_button_lslr", "Calculation")
               ),
               mainPanel(
               tabsetPanel(type = "tabs",
-                          tabPanel("Check data",
+                          tabPanel("Upload data",
                                    h4("Training data"), 
                                    DT::dataTableOutput("table_reg_x_lslr"),
                                    h4("Prediction data for y"),
                                    DT::dataTableOutput("table_predY_x_lslr"),
                                    h4("Prediction data for x"),
                                    DT::dataTableOutput("table_predX_y_lslr")),
+                          tabPanel("Usage training data", 
+                                   DT::dataTableOutput("Usage_table_lslr"),
+                                   h6("Output table data as csv"),
+                                   downloadButton("download_usagedata_lslr", "Download")
+                          ),
                           tabPanel("Result", 
                                    h4("Measured-calculated plot"),
                                    plotOutput("plot_regression_lslr", 
@@ -346,18 +394,25 @@ shinyUI(navbarPage(theme = shinytheme("sandstone"),"Gofard",
           uif_csv_uplode("datafile_reg_lasso", ""),
           htmlOutput("data_reg_x_lasso"),
           htmlOutput("data_reg_y_lasso"),
-          h5("4.Select a csv file of prediction data"),
+          h5("4.You can choose unused rows."),
+          htmlOutput("unused_rows_lasso"),
+          h5("5.Select a csv file of prediction data"),
           uif_csv_uplode("datafile_pred_lasso", ""),
           htmlOutput("data_pred_x_lasso"),
           actionButton("regression_button_lasso", "Calculation")
         ),
         mainPanel(
           tabsetPanel(type = "tabs",
-                      tabPanel("Check data",
+                      tabPanel("Upload data",
                                h4("Training data"), 
                                DT::dataTableOutput("table_reg_x_lasso"),
                                h4("Prediction data"),
                                DT::dataTableOutput("table_pred_x_lasso")),
+                      tabPanel("Usage training data", 
+                               DT::dataTableOutput("Usage_table_lasso"),
+                               h6("Output table data as csv"),
+                               downloadButton("download_usagedata_lasso", "Download")
+                      ),
                       tabPanel("Result", 
                                h4("Measured-calculated plot"),
                                plotOutput("plot_regression_lasso", 
@@ -400,16 +455,23 @@ shinyUI(navbarPage(theme = shinytheme("sandstone"),"Gofard",
          uif_csv_uplode("datafile_tree", ""),
          htmlOutput("data_x_tree"),
          htmlOutput("data_y_tree"),
-         h5("3.Change the minimum number of split samples (default: 20)"),
+         h5("3.You can choose unused rows."),
+         htmlOutput("unused_rows_tree"),
+         h5("4.Change the minimum number of split samples (default: 20)"),
          numericInput("minsplit_number", "Specify minimum number of split samples",
                       min = 1, max = 1000, value = 20, step = 1),
          actionButton("regression_button_tree", "Calculation")
        ),
        mainPanel(
          tabsetPanel(type = "tabs",
-                     tabPanel("Check data",
+                     tabPanel("Upload data",
                               DT::dataTableOutput("table_x_tree"),
                               ),
+                     tabPanel("Usage data", 
+                              DT::dataTableOutput("Usage_table_tree"),
+                              h6("Output table data as csv"),
+                              downloadButton("download_usagedata_tree", "Download")
+                     ),
                      tabPanel("Result", 
                               h4("tree model:"),
                               plotOutput("summary_tree"), 
@@ -424,17 +486,24 @@ shinyUI(navbarPage(theme = shinytheme("sandstone"),"Gofard",
            uif_csv_uplode("datafile_kmeans", ""),
            htmlOutput("data_kmeans"),
            h6("※Select a column that contains only numbers."),
+           h5("3.You can choose unused rows."),
+           htmlOutput("unused_rows_kmeans"),
            #h5("3.最適クラスター数の確認"),
            #actionButton("regression_button_gap_kmeans", "確認実行"),
-           h5("3.Enter the number of clusters to classify"),
+           h5("4.Enter the number of clusters to classify"),
            numericInput("cluster_number", "Specify number of clusters",
                       min = 1, max = 50, value = 0, step = 1),
          　actionButton("regression_button_clus_kmeans", "Calculation")
        ),
        mainPanel(
          tabsetPanel(type = "tabs",
-                     tabPanel("Check data", 
+                     tabPanel("Upload data", 
                               DT::dataTableOutput("table_kmeans")),
+                     tabPanel("Usage data", 
+                              DT::dataTableOutput("Usage_table_kmeans"),
+                              h6("Output table data as csv"),
+                              downloadButton("download_usagedata_kmeans", "Download")
+                     ),
                      #tabPanel("最適クラスター数", 
                     #           plotOutput("summary_gap_kmeans")),
                      tabPanel("Result", 
@@ -448,6 +517,12 @@ shinyUI(navbarPage(theme = shinytheme("sandstone"),"Gofard",
        )
      )),
      ),#class_navebar tab end--------
-     
+     #debug tab----------
+     #tabPanel("debug",
+      #        textOutput("zzzz"),
+      #        tableOutput("zzzzz")
+              
+              
+     #)#check tab end     
        ))
        
